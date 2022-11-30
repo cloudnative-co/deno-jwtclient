@@ -1,4 +1,5 @@
-import { importPKCS8, SignJWT } from "https://deno.land/x/jose@v4.6.0/index.ts";
+import { importPKCS8, SignJWT } from "https://deno.land/x/jose@v4.11.0/index.ts";
+import { PEMImportOptions } from "https://deno.land/x/jose@v4.11.0/index.ts";
 import { v5 } from "https://deno.land/std@0.165.0/uuid/mod.ts";
 
 export interface Payload {
@@ -29,8 +30,11 @@ export class JWTClient {
         }
     }
 
-    protected async sign(payload: Payload, alg: string, key: string) {
-        const jwt = await new SignJWT(payload).setProtectedHeader({ alg: alg });
+    protected async sign(payload: Payload, alg: string, key: string, headers: any = {}) {
+        headers["typ"] = "JWT";
+        headers["alg"] = alg;
+
+        const jwt = await new SignJWT(payload).setProtectedHeader(headers);
         return jwt.sign(await importPKCS8(key, alg));
     }
 
